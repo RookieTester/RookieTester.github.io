@@ -4,7 +4,7 @@ SEOTitle: 小白的博客 | Hux Blog
 header-img: img/home-bg.jpg
 email: 843633513@qq.com
 description: "关于后端开发与测试 | 朱东明，Tester,Server development | 这里是 @小白 的个人博客。"
-keyword: "小白，天琴圣域，朱东明，某狂热追求者，傻子，闷骚变态"
+keyword: "小白, 天琴圣域, 朱东明, 某狂热追求者, 傻子, 闷骚变态"
 url: "https://RookieTester.github.io"              # your host, for absolute URL
 baseurl: ""                             # for example, '/blog' if your blog hosted on 'host/blog'
 
@@ -71,7 +71,7 @@ duoshuo_share: true                     # set to false if you want to use Commen
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
 sidebar-about-description: "只是为了追求幸福而已......"
-sidebar-avatar: /img/avatar-hux.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
+sidebar-avatar: 头像.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
 
