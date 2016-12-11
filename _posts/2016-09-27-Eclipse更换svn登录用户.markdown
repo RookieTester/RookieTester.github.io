@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      "Eclipse更换svn当前登录用户
+title:      "Eclipse更换svn当前登录用户"
 subtitle:   ""
 date:       2016-09-27 21:42:43
 author:     "小白"
