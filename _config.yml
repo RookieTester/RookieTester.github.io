@@ -91,7 +91,7 @@ service-worker: true
 friends: [
     {
         title: "莲子",
-        href: ""
+        href: "http://steamcommunity.com/profiles/76561198258022279/"
     },{
         title: "",
         href: ""
