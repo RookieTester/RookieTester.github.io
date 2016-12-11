@@ -5,7 +5,7 @@ header-img: img/home-bg.jpg
 email: 843633513@qq.com
 description: "关于后端开发与测试 | 朱东明，Tester,Server development | 这里是 @小白 的个人博客。"
 keyword: "小白, 天琴圣域, 朱东明, 某莲子的忠实追求者, 测试开发, 后端, 安卓"
-url: "https://RookieTester.github.io"              # your host, for absolute URL
+url: "https://rookietester.github.io"              # your host, for absolute URL
 baseurl: ""                             # for example, '/blog' if your blog hosted on 'host/blog'
 
 
