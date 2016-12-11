@@ -1,0 +1,163 @@
+---
+layout:     post
+title:      "领主自建骑士机制代码试读"
+subtitle:   ""
+date:       2016-07-31 15:01:45
+author:     "小白"
+tags:
+    - 骑马与砍杀
+    - Module System
+    - 反编译
+---
+
+1.首先是这张图片，领主自建骑士时会触发。
+![](http://imgsrc.baidu.com/forum/w%3D580/sign=ef72caf5ad18972ba33a00c2d6cc7b9d/a3793edfa9ec8a135c43a101f103918fa1ecc048.jpg)
+代码在presentations.txt里的prsnt_order_founded，就是画图，没啥好说的，自己看。
+
+
+2.然后是菜单文件menus.txt，在notification_order_founded这个里面，就是触发上面这个图画的代码，然后再关闭掉，更没啥好说的。
+
+3.重要的逻辑都放在了simple_triggers.txt里，如下，我用注释解释一下我能看懂的地方
+<pre>
+384.000000, #每384小时执行一次下面的代码
+[
+(store_current_day, ":var_0"), #获取玩家游戏的天数变量0
+(gt, ":var_0", 365), #如果变量0，也就是天数大于365
+(store_character_level, ":var_1", "trp_player"), #获取玩家等级，存为变量1
+(gt, ":var_1", 30), #如果变量1大于等于30，
+(store_random_in_range, ":var_2", 0, 100), #生成随机数，范围在0到100之间，存为变量2
+(neg|ge, ":var_2", 5), # 如果变量2小于5
+(assign, ":var_3", 0), #将变量3赋值为0
+(try_for_range, ":var_4", "fac_dragon_knights", "fac_player_knights"), #取龙骑士阵营到玩家自建骑士之间的所有值，循环遍历赋值给变量4
+(faction_get_slot, ":var_5", ":var_4", 68), #获取该阵营的68号slot，存为变量5
+(assign, ":var_6", 0), #将变量6赋值为0
+(try_for_range, ":var_7", "p_town_1", "p_village_1"), #遍历所有城镇和城堡，赋值给变量7
+(party_slot_eq, ":var_7", 289, ":var_5"),#如果该城镇或城堡已经建立了骑士团分部
+(assign, ":var_6", 1),#将变量6赋值为1
+(try_end),
+(eq, ":var_6", 0),#如果变量6等于0
+(val_add, ":var_3", 1), #变量3加1
+(try_end),
+(gt, ":var_3", 0),#如果变量3大于0
+(assign, ":var_8", 0),#将变量8赋值为0
+#接下来一小段差不多
+(store_random_in_range, ":var_9", 0, ":var_3"),
+(val_add, ":var_9", 1),
+(try_for_range, ":var_4", "fac_dragon_knights", "fac_player_knights"),
+(eq, ":var_8", 0),
+(faction_get_slot, ":var_5", ":var_4", 68),
+(assign, ":var_6", 0),
+(try_for_range, ":var_7", "p_town_1", "p_village_1"),
+(party_slot_eq, ":var_7", 289, ":var_5"),
+(assign, ":var_6", 1),
+(try_end),
+(eq, ":var_6", 0),#如果变量6等于0
+(val_sub, ":var_9", 1),#变量9的值减1
+(eq, ":var_9", 0),#如果变量9等于0
+(assign, ":var_8", ":var_4"),#将变量4的值赋给变量8
+(try_end),
+(assign, ":var_10", 0),#将变量10赋值为0
+(try_for_range, ":var_11", "fac_kingdom_1", "fac_kingdoms_end"),#在王国阵营间遍历
+(faction_slot_eq, ":var_11", slot_faction_state, 0),#如果该阵营还没有被消灭
+(faction_get_slot, ":var_12", ":var_11", slot_faction_leader),#获取该阵营的领袖id
+(assign, ":var_6", 0),#将变量6赋值为0
+(try_for_range, ":var_7", "p_town_1", "p_village_1"),#在所有城镇和城堡之间遍历，部队id赋值给变量7
+(eq, ":var_6", 0),
+(party_slot_eq, ":var_7", slot_town_lord, ":var_12"),#如果该城镇或城堡的领主恰好是国王
+(party_slot_eq, ":var_7", 289, 0),
+(party_slot_eq, ":var_7", slot_center_is_besieged_by, -1),#如果该城镇或城堡没有被围攻
+(assign, ":var_6", 1),
+(try_end),
+(eq, ":var_6", 1),
+(val_add, ":var_10", 1),
+(try_end),
+(gt, ":var_10", 0),
+(assign, ":var_13", 0),
+(assign, ":var_14", 0),
+(store_random_in_range, ":var_15", 0, ":var_10"),
+(val_add, ":var_15", 1),
+(try_for_range, ":var_11", "fac_kingdom_1", "fac_kingdoms_end"),
+(eq, ":var_13", 0),
+(faction_slot_eq, ":var_11", slot_faction_state, 0),
+(faction_get_slot, ":var_12", ":var_11", slot_faction_leader),
+(assign, ":var_6", 0),
+(try_for_range, ":var_7", "p_town_1", "p_village_1"),
+(eq, ":var_6", 0),
+(party_slot_eq, ":var_7", slot_town_lord, ":var_12"),
+(party_slot_eq, ":var_7", 289, 0),
+(party_slot_eq, ":var_7", slot_center_is_besieged_by, -1),
+(assign, ":var_6", 1),
+(val_sub, ":var_15", 1),
+(eq, ":var_15", 0),
+(assign, ":var_13", ":var_12"),
+(assign, ":var_14", ":var_7"),
+(try_end),
+(try_end),
+(faction_get_slot, ":var_16", ":var_8", 68),
+(party_set_slot, ":var_14", 289, ":var_16"),
+(call_script, "script_add_notification_menu", "mnu_notification_order_founded", ":var_8", ":var_14"),
+#这里就是调用脚本，让那个被选中的国王创建一个骑士团礼堂。
+]),
+</pre>
+
+以上就是国王自建一个现有骑士团礼堂的机制（就是龙骑士、狮子、狮鹫这些现有的）。
+
+还有紧接着底下还有个简单触发器也是差不多，在那里调用了生成领主自建骑士的脚本script_generate_minor_order，脚本很复杂，就是定义了一些领主自建骑士属性和装备的代码。
+
+**直接看结论：**
+
+----------
+
+
+1.领主建立骑士团礼堂的概率极低，需要满足玩家达到30级或以上，游戏时间超过365天，且这个触发器300多个小时才触发一次。在这些的基础上，还要再加个1/20的概率；
+
+2.国王只能建立现有的骑士团礼堂，狮鹫、乌木护手之类的也算现有的，普通领主则可以自建新骑士团；且这个国王必须是当前阵营的领袖，言外之意就是说，如果玩家利用黑科技招揽了一个国王，再给他封地，这个国王也不能建立骑士团礼堂了；
+
+3.复国者作为领主时不能建立骑士团礼堂，但如果复国成功成为国王后则有可能建立已有的骑士团；
+
+4.城镇或城堡被围攻时，不能触发该功能。
+
+5.封NPC为领主后，NPC有几率建立新骑士团。
+
+**领主自建骑士的起名机制**
+
+----------
+脚本随机从str_minor_order_adj_yellow到str_minor_order_adj_eternal之间取一个字符串，分别是
+<pre>
+str_minor_order_adj_yellow|黄
+str_minor_order_adj_golden|黄 金
+str_minor_order_adj_blue|蓝
+str_minor_order_adj_azure|天 蓝
+str_minor_order_adj_black|黑
+str_minor_order_adj_dark|深 黑
+str_minor_order_adj_red|红
+str_minor_order_adj_scarlet|深 红
+str_minor_order_adj_white|白
+str_minor_order_adj_silver|银
+str_minor_order_adj_green|绿
+str_minor_order_adj_emerald|祖 母 绿
+str_minor_order_adj_glorious|荣 耀 的
+str_minor_order_adj_radiant|灿 烂 的
+str_minor_order_adj_steadfast|坚 定 地
+str_minor_order_adj_eternal|不 朽 的，
+</pre>
+这就是骑士名字的第一个前缀；
+然后第二个前缀是从
+<pre>
+str_minor_order_noun_eagle|鹰
+str_minor_order_noun_lion|狮
+str_minor_order_noun_boar|猪
+str_minor_order_noun_dragon|龙
+str_minor_order_noun_lily|百 合 花
+str_minor_order_noun_cross|十 字
+str_minor_order_noun_stallion|雄 马
+str_minor_order_noun_stag|牧 鹿
+str_minor_order_noun_castle|城 堡
+str_minor_order_noun_wolf|狼
+str_minor_order_noun_dolphin|海 豚
+str_minor_order_noun_pimpernel|海 绿
+</pre>
+这之间取。
+也就是说，领主的自建骑士的名字和这些脱不了干系了。所以你会看见“坚定地猪骑士”、“深红海绿骑士”之类特别逗比的名字。
+
+什么？你觉得这些你都不喜欢？那你自己改汉化文件去。比如把第一部分的汉化内容全改为“异端”，第二部分全改为“黑”，那领主的自建骑士就只能叫“异端黑骑士”了。
