@@ -5,8 +5,7 @@ subtitle:   ""
 date:       2016-07-13 21:46:45
 author:     "小白"
 tags:
-    - 知乎
-    - 交互设计
-    - Android
+    - 前端
+    - GitHub
 ---
 尝试用Gitpage+jeklly搭建了一个个人博客，借鉴了不少开源框架，主题也是从别人那fork过来修修剪剪，不过总算是成功了，给自己点个赞吧。
