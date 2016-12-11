@@ -1,11 +1,21 @@
-#【Java后端-摘抄】 serialVersionUID学习 #
-## Intellij IDEA 自动生成 serialVersionUID ##
+---
+layout:     post
+title:      "serialVersionUID学习"
+subtitle:   ""
+date:       2016-12-01 23:55:53
+author:     "小白"
+tags:
+    - Java后端
+    - 摘抄
+---
+
+# Intellij IDEA 自动生成 serialVersionUID #
 Setting->Inspections->Serialization issues->Serializable class without ’serialVersionUID’ 
 </br>
 ![](http://static.oschina.net/uploads/img/201407/12170417_rxRm.jpg)
 选中以上后，在你的class中：光标定位在类名，按 Alt+Enter 就会提示自动创建 serialVersionUID 了。
 
-## serialVersionUID作用 ##
+# serialVersionUID作用 #
 serialVersionUID适用于Java的序列化机制。简单来说，Java的序列化机制是通过判断类的serialVersionUID来验证版本一致性的。在进行反序列化时，JVM会把传来的字节流中的serialVersionUID与本地相应实体类的serialVersionUID进行比较，如果相同就认为是一致的，可以进行反序列化，否则就会出现序列化版本不一致的异常，即是InvalidCastException。
 </br>
 serialVersionUID有两种显示的生成方式：        
