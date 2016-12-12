@@ -1,16 +1,11 @@
 ---
-layout: post
-title:  "第一篇博客"
-date:   2016-07-18 21:46:45 +0800
-categories: jekyll update
+layout:     post
+title:      "第一篇博客"
+subtitle:   ""
+date:       2016-07-13 21:46:45
+author:     "小白"
+tags:
+    - 前端
+    - GitHub
 ---
-## 第一篇博客 ##
-
-**新的启程** 第一次用MarkDown写文章，好激动啊！
-
-### 个人博客站 ###
-
-欢迎访问我的[个人博客站](https://rookietester.github.io/)
-testtesttesttetttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt
-
-2016/7/13 21:46:45 
+尝试用Gitpage+jeklly搭建了一个个人博客，借鉴了不少开源框架，主题也是从别人那fork过来修修剪剪，不过总算是成功了，给自己点个赞吧。

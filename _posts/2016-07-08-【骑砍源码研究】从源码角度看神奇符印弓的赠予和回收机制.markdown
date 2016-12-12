@@ -1,0 +1,92 @@
+---
+layout:     post
+title:      "从源码角度看神奇符印弓的赠予和回收机制"
+subtitle:   ""
+date:       2016-07-08 22:22:45
+author:     "小白"
+tags:
+    - 骑马与砍杀
+    - Module System
+    - 反编译
+---
+
+可能有些新人还不知道我在说啥，所以我先简单解释一下。当预兆之狼大军刷出来时，玩家如果到地图北边，也就是瑞文斯顿中部，可能会收到神赠送的一把神奇符印弓，但是预兆之狼大军被灭掉以后，就可能被收，这次我从代码角度分析一下神赠予玩家弓的条件以及回收的条件。
+
+首先看看Python代码（这是我用工具反编译的，不要向我要工具了，我以前有个讲txt修改经验的帖子把链接和使用教程都放出了），能大概看懂的都可以看看，我会一句一句解释。#号紧跟的是注释
+<pre>
+(24.000000,
+[
+(try_begin), #开始判断条件
+(eq, "$ullbow", 0), #如果全局变量ullbow=0，执行下面的代码
+(try_begin), #第二层判断
+(store_num_parties_of_template, ":var_0", "pt_wolfbode"),#将大地图上活跃的预兆之狼大军数量存储为局部变量var_0
+(ge,":var_0", 1), #如果var_0大于等于1，也就是预兆之狼大军数量大于等于1（当然正常情况下不会大于1）
+(party_template_get_slot, ":var_1", "pt_wolfbode", 7),#为预兆之狼大军设定一个slot
+(store_distance_to_party_from_party, ":var_2", ":var_1","p_main_party")#将玩家部队与预兆之狼大军的大地图距离保存为局部变量var_2,
+(neg|ge,":var_2", 30), #如果局部变量var_2小于30，也就是玩家与预兆之狼的距离小于30（单位我不清楚）
+(store_free_inventory_capacity, ":var_3", "trp_player"),#获取玩家背包里空着的格子数，存在局部变量var_3
+(try_begin),#满足以上条件才继续执行下面的代码
+(neg|ge, ":var_3", 1),#若var_3小于1，也就是如果玩家的背包满了
+(display_message, "@The God UllrVetr is about to give you a gift, but youmust have space for it in your inventory.", 0x30FFC8),#右下角消息：神想送你礼物，但你没有足够的空间放下
+(else_try),#或者满足：
+(ge, ":var_3", 1),#玩家背包有1个或一个以上的空位
+(assign, "$ullbow", 1),#将全局变量ullbow赋值为1
+(play_sound, "snd_ullrvetr_manifests_as_bow"),#然后放一段语音，听过的都懂
+(display_message, "@A god's voice booms across the sky: I, UllrVetr,God of Bowmen, manifest myself to you as this bow. Use it well in thebattle to come.", 0x30FFC8),#右下角文字，送你一把神弓，在接下来的战斗里好好使用。
+(troop_add_item, "trp_player", "itm_pl_326"),#送玩家神奇符印弓
+(try_end),#结束最里层判断
+(try_end),#结束一层判断
+(else_try),#或者：
+(eq, "$ullbow", 1),#如果全局变量ullbow等于1，也就是玩家获得了神弓，不管你怎么处理这把弓
+(store_num_parties_of_template,":var_0", "pt_wolfbode"),#获取预兆之狼大军的数量，存为var_0
+(eq, ":var_0", 0),#如果数量等于0
+(assign, "$ullbow", 2),#将全局变量ullbow置为2
+(try_begin),#继续判断
+(player_has_item, "itm_pl_326"),#如果玩家背包里有神奇符印弓
+(troop_remove_item, "trp_player", "itm_pl_326"),#移除神奇符印弓
+(else_try),#或者
+(assign,":var_4", 0),#新建局部变量var_4，赋值为0
+(try_for_range, ":var_5", "trp_npc_adonja","trp_kingdom_1_lord"),#在玩家的可用的所有NPC之间遍历循环，将每次取到的NPC赋给var_5
+(eq, ":var_4", 0),#如果var_4=0
+(troop_has_item_equipped, ":var_5", "itm_pl_326"),#如果某个NPC装备了神奇符印弓
+(troop_remove_item, ":var_5", "itm_pl_326"),#移除神奇符印弓
+(str_store_troop_name, s2, ":var_5"),#将那个NPC的名字记录在字符串s2中
+(str_store_item_name, s10, "itm_pl_326"),#获得神奇符印弓的名字，记录在字符串s10中
+(display_message, "@{s2} loses the {s10}."),#右下角消息：某NPC失去了神奇符印弓
+(assign, ":var_4", 1),#将var_4值改为1
+(try_end),#结束当前判断循环
+(eq,":var_4", 0),#如果var_4=0
+(try_for_range, ":var_6", "trp_town_1_seneschal","trp_town_1_arena_master"),#在所有的城堡管家之间循环遍历（其实就是搜所有城镇和城堡的箱子）
+(eq, ":var_4", 0),#如果var_4=0（妈的智障，连续判断两次是闹怎样）
+(troop_get_inventory_capacity, ":var_7", ":var_6"),
+(try_for_range, ":var_8", 0, ":var_7"),
+(troop_get_inventory_slot, ":var_9", ":var_6",":var_8"),
+(eq, ":var_9", "itm_pl_326"),
+(troop_remove_item, ":var_6", "itm_pl_326"),
+(str_store_troop_name, s2, ":var_6"),
+(str_store_item_name, s10, "itm_pl_326"),#到这里的意思就是如果箱子里有神奇符印弓就没收掉（这里我没全看懂，不知道是一定会没收还是几率没收）
+(display_message, "@{s2} reports the {s10} is gone missing from the castlechest."),#右下角消息：某管家报告说神奇符印弓丢失了
+(assign, ":var_4", 1),#将var_4置为1
+(assign, ":var_7", 0),#将var_7置为0
+(try_end),
+(try_end),
+(try_begin),
+(eq, ":var_4", 0),#如果var_4=0
+(troop_remove_item, "trp_bonus_chest_1", "itm_pl_326"),
+(troop_remove_item, "trp_bonus_chest_2", "itm_pl_326"),
+(troop_remove_item, "trp_bonus_chest_3", "itm_pl_326"),#这三句意思是分别从三个藏宝箱移除神奇符印弓（我不知道是哪三个藏宝箱，原版3.7这三个宝箱在魔球中物品栏的序列号是 959~961）
+(try_end),
+(try_end),
+(try_end),
+
+]),
+</pre>
+
+总结一下，当预兆之狼刷出来时，玩家如果与预兆之狼的距离小于30（单位不明），哪怕老狼跑到了地图最南边，神都会尝试赠送你神奇符印弓，如果当时背包满了，则会失败，24小时后再次判断，如果那是恰好再次满足以上条件，还可以获得神奇符印弓。
+
+每24小时检测一次，当预兆之狼大军被打败，也就是地图上不存在了，不论是谁干的。此时判断玩家背包里是否有神奇符印弓，请注意，这把神奇符印弓就算不是神送你的那把此时也会被没收的，喊冤也没用，但是自己装备上则不会；又或者你放在任意一个NPC身上，也会被移除；或者放在任何一个城堡箱子里，也会被移除（这里不确定是一定移除还是几率移除）。
+应对方法：1.自己装备；
+2.将其附魔，并注意背包里不要放未附魔的神奇符印弓，NPC也不要装备；
+3.卖给书商；
+4.看运气，若能精确地躲过触发器的检测则无事（毕竟每24小时检测一次）；
+误解：亲自打败老狼大军、单刷老狼大军可以留住弓，这都不是原因，可能是恰好当时你装备着符印弓，或者运气好避过了触发器检测。

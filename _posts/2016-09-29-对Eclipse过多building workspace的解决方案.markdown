@@ -1,4 +1,13 @@
-# 对eclipse过多building workspace的解决方案 #
+---
+layout:     post
+title:      "对eclipse过多building workspace的解决方案"
+subtitle:   ""
+date:       2016-09-29 21:26:15
+author:     "小白"
+tags:
+    - Java后端
+---
+
 点击项目右键，选择Properties</br>
 如下图</br>
 
