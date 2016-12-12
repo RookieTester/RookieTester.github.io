@@ -1,0 +1,72 @@
+---
+layout:     post
+title:      "接口测试Mock实践"
+subtitle:   ""
+date:       2016-12-12 11:59:17
+author:     "小白"
+tags:
+    - 接口测试
+    - Mock
+---
+
+<h1>使用moco</h1>
+这里我就不讲Java API的使用方法了，因为我对着最新版的说明手册写demo时，发现很多方法都变参数了，还有不少废弃了，有点生气就放弃了。直接使用stand-alone包吧。
+<h2>首先，启动moco服务。</h2>
+我将命令保存在.bat文件里了，方便一键使用。
+<pre>
+java -jar moco-runner-0.11.0-standalone.jar http -p 12306 -c RESTFul.json
+pause
+</pre>
+- -jar 指定jar包路径，相对路径和绝对路径都可以
+- -p 指定端口，其实我还是喜欢使用80端口，因为访问接口时可以省略不写，强迫症表示看着舒服
+- -c 指定配置文件的路径
+- pause是为了在出错时能看到报错信息
+
+<h2>接下来写配置文件</h2>
+```js
+[
+{
+  "request" :
+    {
+      "method" : "get",
+      "uri" : "/demo/foo"
+    },
+  "response" :
+    {
+      "file" : "response.json"
+    }
+}
+]
+```
+配置文件使用json描述，不过最外层记得要用[]包着。属性名都简单易懂，我就不解释了。需要注意这里URI匹配/foo，后面无论跟怎样的参数，返回的响应都一样（除非你另起一个moco服务，并且对匹配定义得更精确）。
+
+最后又是强迫症的需求，比如我想对app.api.com.cn/demo/foo?a=1这个接口做Mock，而访问moco数据，需要输入IP，就有些难看了。其实也很简单，在访问moco服务的电脑里加入host：
+
+127.0.0.1 app.api.com.cn
+
+即可。
+<h1>使用Nginx</h1>
+Nginx相对麻烦些。这里直接提供配置。以后有机会详细讲下各种配置项吧。
+
+```js
+server {
+    listen       80;
+    server_name  cars.app.autohome.com.cn;
+
+    location / {
+        root   e:/mock;
+    }
+
+    location /demo/foo {
+        proxy_pass   http://127.0.0.1/response.json;
+    }
+}
+```
+怎么启动Nginx我就不详细说了，Windows下直接点击EXE执行文件即可。或者加入环境变量，用命令start nginx启动。
+
+之后如果想停止或者重载配置，则可以：
+
+- nginx -s stop
+- nginx -s reload
+
+最后，如果是强迫症，还是要加host。。。
