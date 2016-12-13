@@ -59,11 +59,15 @@ sudo apt-get install apache2-utils
 
 -g *把所有测试结果写入一个'gnuplot'或者TSV(以Tab分隔的)文件。此文件可以方便地导入到Gnuplot,IDL,Mathematica,Igor甚至Excel中。其中的第一行为标题。*
 
--i *执行HEAD请求，而不是GET。*
-
 -k *启用HTTP KeepAlive功能，即在一个HTTP会话中执行多个请求。默认时，不启用KeepAlive功能。*
 
 -q *如果处理的请求数大于150，ab每处理大约10%或者100个请求时，会在stderr输出一个进度计数。此-q标记可以抑制这些信息。*
+
+**注意：
+发送get请求时，若需要传递多个参数，需要把URL以字符串的形式传递，否则只能解析到第一个参数。例如：
+
+ab -c 10 -n 100 "http://mobile.app.autohome.com.cn/discover_v7.5.0/mobile/getcardlist.ashx?a=2&pm=1&v=7.3.0&pid=110000&cid=110100&lat=39.985564&lng=116.318662&uid=0&deviceid=test35519112070873360&pageindex=1&pagesize=20&hid=&state=1"
+**
 
 # 性能指标 #
 ## 吞吐率（Requests per second） ##
