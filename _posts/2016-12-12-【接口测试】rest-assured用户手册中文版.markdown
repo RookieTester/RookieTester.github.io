@@ -126,9 +126,9 @@ REST Assured是一个可以简化HTTP Builder（创建者模式？）顶层基�
 1. [Kotlin支持](#kotlin)
 1. [更多](#more-info)
 
-## Static imports ##
+## 静态导入方法 ##
 
-In order to use REST assured effectively it's recommended to statically import methods from the following classes:
+推荐大家从以下的类中静态导入方法，以提高使用rest-assured的效率。
 
 ```java
 io.restassured.RestAssured.*
@@ -136,23 +136,23 @@ io.restassured.matcher.RestAssuredMatchers.*
 org.hamcrest.Matchers.*
 ```
 
-If you want to use [Json Schema](http://json-schema.org/) validation you should also statically import these methods:
+如果你想使用[Json Schema](http://json-schema.org/) validation 你还应该静态导入这些方法： 
 
 ```java
 io.restassured.module.jsv.JsonSchemaValidator.*
 ```
 
-Refer to [Json Schema Validation](#json-schema-validation) section for more info.
+更多使用方法参阅 [Json Schema Validation](#json-schema-validation) 。
 
-If you're using Spring MVC you can use the [spring-mock-mvc](#spring-mock-mvc-module) module to unit test your Spring Controllers using the Rest Assured DSL. To do this statically import the methods from [RestAssuredMockMvc](http://static.javadoc.io/io.restassured/spring-mock-mvc/3.0.1/io/restassured/module/mockmvc/RestAssuredMockMvc.html) _instead_ of importing the methods from `io.restassured.RestAssured`:
+如果你正在使用SpringMVC，你可以使用[spring-mock-mvc](#spring-mock-mvc-module) 模型的Rest Assured DSL来对Spring的controller层进行单元测试。为此你需要从[RestAssuredMockMvc](http://static.javadoc.io/io.restassured/spring-mock-mvc/3.0.1/io/restassured/module/mockmvc/RestAssuredMockMvc.html)静态导入这些方法，而不是`io.restassured.RestAssured`:
 
 ```java
 io.restassured.module.mockmvc.RestAssuredMockMvc.*
 ```
-# Examples
+# 示例
 
-## Example 1 - JSON ##
-Assume that the GET request (to http://localhost:8080/lotto) returns JSON as:
+## 例一 - JSON ##
+假设某个get请求 (to http://localhost:8080/lotto) 返回JSON如下:
 
 ```javascript
 {
@@ -170,24 +170,25 @@ Assume that the GET request (to http://localhost:8080/lotto) returns JSON as:
 }
 ```
 
-REST assured can then help you to easily make the GET request and verify the response. E.g. if you want to verify that lottoId is equal to 5 you can do like this:
+REST assured可以帮助你轻松地进行get请求并对响应信息进行处理。举个例子，如果你想要判断lottoId的值是否等于5，你可以这样做：
 
 ```java
 get("/lotto").then().body("lotto.lottoId", equalTo(5));
 ```
-or perhaps you want to check that the winnerId's are 23 and 54:
+又或许你想要检查winnerId的取值**包括**23和54：
 
 ```java
 get("/lotto").then().body("lotto.winners.winnerId", hasItems(23, 54));
 ```
 
-Note: `equalTo` and `hasItems` are Hamcrest matchers which you should statically import from `org.hamcrest.Matchers`.
+注意: `equalTo` 和 `hasItems` 是 Hamcrest matchers的方法，所以你需要静态导入 `org.hamcrest.Matchers`。
 
-Note that the "json path" syntax uses <a href='http://groovy-lang.org/processing-xml.html#_gpath'>Groovy's GPath</a> notation and is not to be confused with Jayway's <a href='https://github.com/jayway/JsonPath'>JsonPath</a> syntax.
+注意这里的"json path"语法使用的是<a href='http://groovy-lang.org/processing-xml.html#_gpath'>Groovy的GPath</a>标注法，不要和Jayway的<a href='https://github.com/jayway/JsonPath'>JsonPath</a>语法混淆。
 
-### Returning floats and doubles as BigDecimal ###
+### 以BigDecimal返回float和double类型 ###
+（译者注：Java在java.math包中提供的API类BigDecimal，用来对超过16位有效位的数进行精确的运算）
 
-You can configure Rest Assured and JsonPath to return BigDecimal's instead of float and double for Json Numbers. For example consider the following JSON document:
+你可以对rest-assured和JsonPath进行配置，使之以BigDecimal返回json里的数值类型数据，而不是float或者double。可以参考下面json文本：
 
 ```javascript
 {
@@ -196,14 +197,12 @@ You can configure Rest Assured and JsonPath to return BigDecimal's instead of fl
 
 }
 ```
-
-By default  you validate that price is equal to 12.12 as a float like this:
+默认情况下你验证price字段是否等于float类型的12.12像这样：
 
 ```java
 get("/price").then().body("price", is(12.12f));
 ```
-
-but if you like you can configure REST Assured to use a JsonConfig that returns all Json numbers as BigDecimal:
+但是如果你想用rest-assured的JsonConfig来配置返回的所有的json数值都为BigDecimal类型：
 
 ```java
 given().
@@ -216,7 +215,7 @@ then().
 
 ### JSON Schema validation ###
 
-From version `2.1.0` REST Assured has support for [Json Schema](http://json-schema.org/) validation. For example given the following schema located in the classpath as `products-schema.json`:
+自从 `2.1.0` 版本rest-assured开始支持[Json Schema](http://json-schema.org/) validation. 举个例子，在classpath中放置以下的schema文件（译者注：idea的话可以放在resources目录下），`products-schema.json`:
 ```javascript
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -264,11 +263,11 @@ From version `2.1.0` REST Assured has support for [Json Schema](http://json-sche
     }
 }
 ```
-you can validate that a resource (`/products`) conforms with the schema:
+你可以使用这个schema验证(`/products`)这个请求是否符合规范：
 ```java
 get("/products").then().assertThat().body(matchesJsonSchemaInClasspath("products-schema.json"));
 ```
-`matchesJsonSchemaInClasspath` is statically imported from `io.restassured.module.jsv.JsonSchemaValidator` and it's recommended to statically import all methods from this class. However in order to use it you need to depend on the `json-schema-validator` module by either [downloading](http://dl.bintray.com/johanhaleby/generic/json-schema-validator-3.0.1-dist.zip) it from the download page or add the following dependency from Maven:
+`matchesJsonSchemaInClasspath` 静态导入自 `io.restassured.module.jsv.JsonSchemaValidator` 并且我们推荐从这个类中静态导入所有的方法。然而为了使用它你需要依赖于`json-schema-validator` module 或者从这个网页 [下载](http://dl.bintray.com/johanhaleby/generic/json-schema-validator-3.0.1-dist.zip) 它， 又或者通过maven添加下面的依赖:
 ```xml
 <dependency>
     <groupId>io.rest-assured</groupId>
@@ -277,9 +276,9 @@ get("/products").then().assertThat().body(matchesJsonSchemaInClasspath("products
 </dependency>
 ```
 
-### JSON Schema Validation Settings ###
+### JSON Schema Validation 设置项 ###
 
-REST Assured's `json-schema-validator` module uses Francis Galiegue's [json-schema-validator](https://github.com/fge/json-schema-validator) (`fge`) library to perform validation. If you need to configure the underlying `fge` library you can for example do like this:
+rest-assured的`json-schema-validator` module使用Francis Galiegue的[json-schema-validator](https://github.com/fge/json-schema-validator) (`fge`) 库来进行验证。 如果你想配置使用基础`fge`库，你可以像下面例子中：
 
 ```java
 // Given
@@ -289,20 +288,20 @@ JsonSchemaFactory jsonSchemaFactory = JsonSchemaFactory.newBuilder().setValidati
 get("/products").then().assertThat().body(matchesJsonSchemaInClasspath("products-schema.json").using(jsonSchemaFactory));
 ```
 
-The `using` method allows you to pass in a `jsonSchemaFactory` instance that REST Assured will use during validation. This allows fine-grained configuration for the validation.
+using方法允许你进入`jsonSchemaFactory`的实例，rest-assured在验证期间也会进行此操作。这种方式允许我们对验证进行细粒度的配置。
 
-The `fge` library also allows the validation to be `checked` or `unchecked`. By default REST Assured uses `checked` validation but if you want to change this you can supply an instance of [JsonSchemaValidatorSettings](http://static.javadoc.io/io.restassured/json-schema-validator/3.0.1/io/restassured/module/jsv/JsonSchemaValidatorSettings.html) to the matcher. For example:
+`fge`库也允许验证状态是 `checked`或者`unchecked`（译者注：表示不懂）。默认情况，rest-assured使用`checked`验证，但是如果你想要改变这种方式，你可以提供一个matcher的[JsonSchemaValidatorSettings](http://static.javadoc.io/io.restassured/json-schema-validator/3.0.1/io/restassured/module/jsv/JsonSchemaValidatorSettings.html)实例。举个例子：
 
 ```java
 get("/products").then().assertThat().body(matchesJsonSchemaInClasspath("products-schema.json").using(settings().with().checkedValidation(false)));
 ```
 
-Where the `settings` method is statically imported from the [JsonSchemaValidatorSettings](http://static.javadoc.io/io.restassured/json-schema-validator/3.0.1/io/restassured/module/jsv/JsonSchemaValidatorSettings.html) class.
+这些`settings`方法静态导入自 [JsonSchemaValidatorSettings](http://static.javadoc.io/io.restassured/json-schema-validator/3.0.1/io/restassured/module/jsv/JsonSchemaValidatorSettings.html)类。
 
-### Json Schema Validation with static configuration ###
+### Json Schema Validation的静态配置###
 
 Now imagine that you always want to use `unchecked` validation as well as setting the default json schema version to version 3. Instead of supplying this to all matchers throughout your code you can define it statically. For example:
-
+现在想象下你总是使用`unchecked`验证，并且设置默认的json schema版本为3。与其每次都在代码里进行设置，不如静态地进行定义设置。举个例子：
 ```java
 JsonSchemaValidator.settings = settings().with().jsonSchemaFactory(
         JsonSchemaFactory.newBuilder().setValidationConfiguration(ValidationConfiguration.newBuilder().setDefaultVersion(DRAFTV3).freeze()).freeze()).
@@ -311,16 +310,16 @@ JsonSchemaValidator.settings = settings().with().jsonSchemaFactory(
 get("/products").then().assertThat().body(matchesJsonSchemaInClasspath("products-schema.json"));
 ```
 
-Now any `matcher` method imported from [JsonSchemaValidator](http://static.javadoc.io/io.restassured/json-schema-validator/3.0.1/io/restassured/module/jsv/JsonSchemaValidatorSettings.html) will use `DRAFTV3` as default version and unchecked validation.
+现在任意一个由[JsonSchemaValidator](http://static.javadoc.io/io.restassured/json-schema-validator/3.0.1/io/restassured/module/jsv/JsonSchemaValidatorSettings.html)导入的`matcher`都会使用`DRAFTV3`作为默认版本并且unchecked validation。
 
-To reset the `JsonSchemaValidator` to its default settings simply call the `reset` method:
+想要重置`JsonSchemaValidator`到默认设置仅仅需要调用`reset`方法：
 
 ```java
 JsonSchemaValidator.reset();
 ```
 
-### Json Schema Validation without REST Assured ###
-You can also use the `json-schema-validator` module without depending on REST Assured. As long as you have a JSON document represented as a `String` you can do like this:
+### 不使用rest-assured的Json Schema Validation  ###
+你也可以在不依赖rest-assured的情况下使用`json-schema-validator` module。如果你想要把json文本表示为`String`类型的字符串，你可以这样做：
 
 ```java
 import org.junit.Test;
@@ -341,7 +340,7 @@ public class JsonSchemaValidatorWithoutRestAssuredTest {
 }
 ```
 
-Refer to the [getting started](GattingStarted) page for more info on this.
+更多信息请参阅[新手入门](GattingStarted)。
 
 ### Anonymous JSON root validation ###
 
