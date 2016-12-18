@@ -1,0 +1,102 @@
+---
+layout:     post
+title:      "显式锁与其实现"
+subtitle:   ""
+date:       2016-12-18 23:58:41
+author:     "小白"
+tags:
+    - Java后端
+    - 并发编程
+---
+# Lock #
+Lock是一个接口，提供了无条件的、可轮询的、定时的、可中断的锁获取操作，所有加锁和解锁的方法都是显式的。核心方法：
+
+- void lock()获取锁。如果锁不可用，出于线程调度的目的，将禁用当前线程，且在获取锁之前，该线程都将处于休眠状态。
+- boolean tryLock()仅在调用时，锁为空闲状态才获取该锁。如果锁可用，则获取锁，并立即返回true；如果锁不可用，则立即返回false。
+- void unLock()释放锁。
+
+## ReentrantLock ##
+ReentrantLock是Lock的实现类，是一个互斥的同步器。在竞争条件下。ReentrantLock的实现要比synchronized实现更具有可伸缩性。这意味着许多线程竞争相同锁定时，ReentrantLock的吞吐量更好。JVM将花费较少的时间调度线程。
+
+**缺点是可能忘记释放锁，建议在finally中加入释放锁的代码。**
+
+```java
+public class ReentrantLockDemo {
+    private final ReentrantLock lock=new ReentrantLock();
+    public void execute(){
+        lock.lock();//获取锁
+        try{
+            //...具体方法体
+        }finally {
+            lock.unlock();
+        }
+    }
+}
+```
+# ReadWriteLock #
+ReadWriteLock也是一个接口。提供了readLock和writeLock两种锁的机制。也就是读写分离，且允许大量线程同时读，或者一个线程写，但不允许同时进行。核心方法即是readLock和writeLock。
+
+## ReentrantReadWriteLock ##
+ReentrantReadWriteLock是ReadWriteLock的唯一实现类。
+满足：
+
+- 读-读不互斥；
+- 读-写互斥；
+- 写-写互斥；
+
+直接看例子
+
+```java
+public class ReentrantReadWriteLockDemo {
+    private final ReentrantReadWriteLock rwl=new ReentrantReadWriteLock();
+    public void get(){
+        rwl.readLock().lock();//上读锁，其它线程可读不可写，高并发性
+        try{
+            System.out.println(Thread.currentThread().getName()+"read start");
+            Thread.sleep(1000L);
+            System.out.println(Thread.currentThread().getName()+"read end");
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }finally {
+            rwl.readLock().unlock();
+        }
+    }
+
+    public void put(){
+        rwl.writeLock().lock();//上写锁，其它线程既不可读也不可写，具有阻塞性
+        try{
+            System.out.println(Thread.currentThread().getName()+"write start");
+            Thread.sleep(1000L);
+            System.out.println(Thread.currentThread().getName()+"write end");
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }finally {
+            rwl.writeLock().unlock();
+        }
+    }
+
+    public static void main(String[] args){
+        final ReentrantReadWriteLockDemo demo=new ReentrantReadWriteLockDemo();
+        for (int i=0;i<3;i++){
+            new Thread(){
+                @Override
+                public void run(){
+                    demo.get();
+                }
+            }.start();
+        }
+
+        for (int i=0;i<3;i++){
+            new Thread(){
+                @Override
+                public void run(){
+                    demo.put();
+                }
+            }.start();
+        }
+    }
+}
+```
+# ReentrantReadWriteLock与ReentrantLock的比较 #
+- 都是显式锁，都需要手动加锁和释放，都很适合高并发场景；
+- ReentrantReadWriteLock是ReentrantLock的扩展，实现了读写分离的场景。
