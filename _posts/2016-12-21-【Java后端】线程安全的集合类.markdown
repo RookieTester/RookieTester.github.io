@@ -1,0 +1,28 @@
+---
+layout:     post
+title:      "线程安全的集合类"
+subtitle:   ""
+date:       2016-12-21 00:42:36
+author:     "小白"
+tags:
+    - Java后端
+    - 并发编程
+---
+# Hashtable #
+是一个散列表，其函数是同步的（方发锁），即线程安全的，key和value都不可以是null，映射是无序的。
+
+# ConcurrentHashMap #
+HashMap的线程安全版，主要使用代码块锁，因此效率上比Hashtable有较大的提升。
+
+# CopyOnWriteArrayList和CopyOnWriteArraySet #
+使用ReentrantLock的加锁和解锁方法，是一个线程安全的List的实现，这对于读操作远多于写操作的场景较为合适。
+
+# Vector #
+矢量队列，通过数组保存数据。使用了方发锁。
+
+# StringBuffer和StringBuilder #
+频繁使用+连接字符串，会建立很多String对象，使用StringBuffer和StringBuilder可以解决这个问题。但是StringBuilder线程不安全，StringBuffer是线程安全的（方发锁）。
+
+# 执行效率 #
+未加锁的>代码块锁>类锁和方法锁。
+并考虑读写分离等特殊业务场景，选择合适的集合类。
