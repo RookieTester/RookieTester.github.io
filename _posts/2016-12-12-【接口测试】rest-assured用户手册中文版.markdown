@@ -215,7 +215,8 @@ then().
 
 ### JSON Schema validation ###
 
-自从 `2.1.0` 版本rest-assured开始支持[Json Schema](http://json-schema.org/) validation. 举个例子，在classpath中放置以下的schema文件（译者注：idea的话可以放在resources目录下），`products-schema.json`:
+自从 `2.1.0` 版本rest-assured开始支持[Json Schema](http://json-schema.org/) validation. 举个例子，在classpath中放置以下的schema文件（译者注：idea的话可以放在resources目录下），products-schema.json:
+
 ```javascript
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -299,8 +300,6 @@ get("/products").then().assertThat().body(matchesJsonSchemaInClasspath("products
 这些`settings`方法静态导入自 [JsonSchemaValidatorSettings](http://static.javadoc.io/io.restassured/json-schema-validator/3.0.1/io/restassured/module/jsv/JsonSchemaValidatorSettings.html)类。
 
 ### Json Schema Validation的静态配置###
-
-Now imagine that you always want to use `unchecked` validation as well as setting the default json schema version to version 3. Instead of supplying this to all matchers throughout your code you can define it statically. For example:
 现在想象下你总是使用`unchecked`验证，并且设置默认的json schema版本为3。与其每次都在代码里进行设置，不如静态地进行定义设置。举个例子：
 ```java
 JsonSchemaValidator.settings = settings().with().jsonSchemaFactory(
