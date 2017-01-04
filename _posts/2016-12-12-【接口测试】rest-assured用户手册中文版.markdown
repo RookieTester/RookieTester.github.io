@@ -341,15 +341,15 @@ public class JsonSchemaValidatorWithoutRestAssuredTest {
 
 更多信息请参阅[新手入门](GattingStarted)。
 
-### Anonymous JSON root validation ###
+### 匿名式的JSON根节点验证 ###
 
-A JSON document doesn't necessarily need a named root attribute. This is for example valid JSON:
+一个JSON文本并不总是有一个命名好的根属性。这里有个验证这种JSON的例子：
 
 ```javascript
 [1, 2, 3]
 ```
 
-An anonymous JSON root can be verified by using `$` or an empty string as path. For example let's say that this JSON document is exposed from `http://localhost:8080/json` then we can validate it like this with REST Assured:
+一个匿名的JSON根属性可以通过使用`$`或者空字符串作为路径来识别。举个例子，通过访问`http://localhost:8080/json`这个地址可以获得一个JSON文本，我们可以使用rest-assured验证：
 
 ```java
 when().
@@ -358,15 +358,15 @@ then().
      body("$", hasItems(1, 2, 3)); // An empty string "" would work as well
 ```
 
-## Example 2 - XML ##
-XML can be verified in a similar way. Imagine that a POST request to `http://localhost:8080/greetXML` returns:
+## 例2 - XML ##
+XML可以一种通过简单的方式解析。假设一个POST请求`http://localhost:8080/greetXML`返回：
 ```xml
 <greeting>
    <firstName>{params("firstName")}</firstName>
    <lastName>{params("lastName")}</lastName>
 </greeting>
 ```
-i.e. it sends back a greeting based on the firstName and lastName parameter sent in the request. You can easily perform and verify e.g. the firstName with REST assured:
+换言之，它在请求中返还了一个基于firstname和lastname请求参数的greeting节点。你可以通过rest-assured轻易地展现和解析这个例子：
 ```java
 given().
          parameters("firstName", "John", "lastName", "Doe").
@@ -375,7 +375,7 @@ when().
 then().
          body("greeting.firstName", equalTo("John")).
 ```
-If you want to verify both firstName and lastName you may do like this:
+如果你想同时解析firstname和lastname你可以这样做：
 ```java
 given().
          parameters("firstName", "John", "lastName", "Doe").
@@ -385,15 +385,16 @@ then().
          body("greeting.firstName", equalTo("John")).
          body("greeting.lastName", equalTo("Doe"));
 ```
-or a little shorter:
+或者稍微简短些：
 ```java
 with().parameters("firstName", "John", "lastName", "Doe").when().post("/greetXML").then().body("greeting.firstName", equalTo("John"), "greeting.lastName", equalTo("Doe"));
 ```
 
 See [this](http://groovy-lang.org/processing-xml.html#_gpath) link for more info about the syntax (it follows Groovy's [GPath](http://groovy-lang.org/processing-xml.html#_gpath) syntax).
+看[这里](http://groovy-lang.org/processing-xml.html#_gpath) 的链接获取有关语法的更多信息(它遵循 Groovy的 [GPath](http://groovy-lang.org/processing-xml.html#_gpath) 语法).
 
-### XML namespaces ###
-To make body expectations take namespaces into account you need to declare the namespaces using the [io.restassured.config.XmlConfig](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/config/XmlConfig.html). For example let's say that a resource called `namespace-example` located at `http://localhost:8080` returns the following XML:
+### XML 命名空间 ###
+考虑到你需要使用[io.restassured.config.XmlConfig](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/config/XmlConfig.html)声明一个命名空间。举个例子，有一个位于`http://localhost:8080`的资源`namespace-example`，返回如下的XML：
 ```xml
 <foo xmlns:ns="http://localhost/">
   <bar>sudo </bar>
@@ -401,7 +402,7 @@ To make body expectations take namespaces into account you need to declare the n
 </foo>
 ```
 
-You can then declare the `http://localhost/` uri and validate the response:
+你可以然后声明`http://localhost/`这个URI并且验证其响应：
 ```java
 given().
         config(RestAssured.config().xmlConfig(xmlConfig().declareNamespace("test", "http://localhost/"))).
@@ -413,23 +414,24 @@ then().
          body("foo.test:bar.text()", equalTo("make me a sandwich!"));
 ```
 
-The path syntax follows Groovy's XmlSlurper syntax. Note that in versions prior to 2.6.0 the path syntax was *not* following Groovy's XmlSlurper syntax. Please see [release notes](https://github.com/rest-assured/rest-assured/wiki/ReleaseNotes26#non-backward-compatible-changes) for versin 2.6.0 to see how the previous syntax looked like.
+这个路径语法遵循Groovy的XmlSlurper语法。注意直到2.6.0的路径语法都*不*遵循Groovy的XmlSlurper语法。请看[release notes](https://github.com/rest-assured/rest-assured/wiki/ReleaseNotes26#non-backward-compatible-changes)可以获知2.6.0之前的版本语法是怎样的。
 
 ### XPath ###
 
-You can also verify XML responses using x-path. For example:
+你也可以使用x-path来解析XML响应。举个例子：
 
 ```java
 given().parameters("firstName", "John", "lastName", "Doe").when().post("/greetXML").then().body(hasXPath("/greeting/firstName", containsString("Jo")));
 ```
 
-or
+或者
 
 ```java
 given().parameters("firstName", "John", "lastName", "Doe").post("/greetXML").then().body(hasXPath("/greeting/firstName[text()='John']"));
 ```
 
 To use namespaces in the XPath expression you need to enable them in the configuration, for example:
+在XPath表达式中使用命名空间，你需要在配置中启用这些选项：
 ```java
 given().
         config(RestAssured.config().xmlConfig(xmlConfig().with().namespaceAware(true))).
@@ -439,52 +441,55 @@ then().
          body(hasXPath("/db:package-database", namespaceContext));
 ```
 
-Where `namespaceContext` is an instance of [javax.xml.namespace.NamespaceContext](http://docs.oracle.com/javase/7/docs/api/javax/xml/namespace/NamespaceContext.html).
+`namespaceContext` 是一个[javax.xml.namespace.NamespaceContext](http://docs.oracle.com/javase/7/docs/api/javax/xml/namespace/NamespaceContext.html)的实例 .
 
-### Schema and DTD validation ###
+### Schema和DTD ###
 
 XML response bodies can also be verified against an XML Schema (XSD) or DTD.
+XML响应体也可以验证为一个XML Schema (XSD)或DTD.
 
-#### XSD example
+#### XSD 例子
 
 ```java
 get("/carRecords").then().assertThat().body(matchesXsd(xsd));
 ```
 
-#### DTD example
+#### DTD 例子
 
 ```java
 get("/videos").then().assertThat().body(matchesDtd(dtd));
 ```
 
-The <code>matchesXsd</code> and <code>matchesDtd</code> methods are Hamcrest matchers which you can import from <a href="http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/matcher/RestAssuredMatchers.html">io.restassured.matcher.RestAssuredMatchers</a>.<br>
 </p>
+<code>matchesXsd</code>和<code>matchesDtd</code>方法在Hamcrest matchers里，你可以从<a href="http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/matcher/RestAssuredMatchers.html">io.restassured.matcher.RestAssuredMatchers</a><br>
+导入。</p>
 
-## Example 3 - Complex parsing and validation ##
-This is where REST Assured really starts to shine! Since REST Assured is implemented in Groovy it can be really beneficial to take advantage of Groovy’s collection API. Let’s begin by looking at an example in Groovy:
+## 例3 - 复杂的解析和验证 ##
+这正是rest-assured闪光点所在！由于rest-assured实现了Groovy，它可以从Groovy集合的API的优点中获益。让我们从下面的Groovy例子中开始探索：
 
 ```groovy
 def words = ['ant', 'buffalo', 'cat', 'dinosaur']
 def wordsWithSizeGreaterThanFour = words.findAll { it.length() > 4 }
 ```
 
-At the first line we simply define a list with some words but the second line is more interesting. 
-Here we search the words list for all words that are longer than 4 characters by calling the findAll with a Groovy closure. 
-The closure has an implicit variable called `it` which represents the current item in the list. 
+在第一行，我们简单地定义了一个包含一些单词的列表，不过第二行更加有趣。
+这里我们检索了列表里的所有长度大于4的单词，通过一个叫做findAll的Groovy闭包。
+这个闭包有一个内部变量`it`，代表着列表中当前的元素。
 The result is a new list, `wordsWithSizeGreaterThanFour`, containing `buffalo` and `dinosaur`. 
+结果是一个新的列表， `wordsWithSizeGreaterThanFour`,包含`buffalo` and `dinosaur`。
 
-There are other interesting methods that we can use on collections in Groovy as well, for example:
+这里还有一些其它的有趣的方法，我们也可以使用在Groovy集合中：
 
-* `find` – finds the first item matching a closure predicate
-* `collect` – collect the return value of calling a closure on each item in a collection
-* `sum` – Sum all the items in the collection
-* `max`/`min` – returns the max/min values of the collection
+* `find` – 找到第一个匹配闭包谓词（closure predicate）的元素
+* `collect` – 收集在集合里的每个元素都调用的闭包返回值（collect the return value of calling a closure on each item in a collection）
+* `sum` – 对集合里的元素进行求和
+* `max`/`min` – 返回集合里的最大值/最小值
 
-So how do we take advantage of this when validating our XML or JSON responses with REST Assured?
+所以我们如何在使用rest-assured验证XML和JSON响应时利用这些优点？
 
-### XML Example
+### XML示例
 
-Let’s say we have a resource at `http://localhost:8080/shopping` that returns the following XML:
+比方说我们有个资源`http://localhost:8080/shopping`返回如下的XML：
 
 ```xml
 <shopping>
@@ -502,7 +507,7 @@ Let’s say we have a resource at `http://localhost:8080/shopping` that returns 
 </shopping>
 ```
 
-Let’s also say we want to write a test that verifies that the category of type groceries has items Chocolate and Coffee. In REST Assured it can look like this:
+又比如我们想写一个测试来检验类型为groceries的category节点有Chocolate和Coffee这两个项目。在rest-assured可以这样做：
 
 ```java
 when().
@@ -511,12 +516,13 @@ then().
        body("shopping.category.find { it.@type == 'groceries' }.item", hasItems("Chocolate", "Coffee"));
 ```
 
-What's going on here? First of all the XML path `shopping.category` returns a list of all categories. 
-On this list we invoke a function, `find`, to return the single category that has the XML attribute, `type`, equal to `groceries`. 
-On this category we then continue by getting all the items associated with this category. 
-Since there are more than one item associated with the groceries category a list will be returned and we verify this list against the `hasItems` Hamcrest matcher.
+这里发生了什么事？首先使用XML路径`shopping.category`获取了所有categoriy的一个列表。在这个列表中我们又调用了一个方法，`find`，来返回有`type`这个属性且该属性值为`groceries`的单个category节点。
 
-But what if you want to get the items and not validate them against a Hamcrest matcher? For this purpose you can use [XmlPath](http://static.javadoc.io/io.restassured/xml-path/3.0.1/io/restassured/path/xml/XmlPath.html):
+在这个category上我们接下来继续收集所有相关联的项目。
+
+由于这里与category相关联的项目不止一个，所以会返回一个列表。接下来我们通过Hamcrest matcher的`hasItems`方法来解析它。
+
+但是如果我们想取得一些项目但又不想进行断言验证该怎么办？你可以参考[XmlPath](http://static.javadoc.io/io.restassured/xml-path/3.0.1/io/restassured/path/xml/XmlPath.html):
 
 ```java
 // Get the response body as a String
@@ -526,15 +532,16 @@ List<String> groceries = from(response).getList("shopping.category.find { it.@ty
 ```
 
 If the list of groceries is the only thing you care about in the response body you can also use a [shortcut](#single-path):
+如果groceries是你对这个响应里唯一的关注点，你也可以使用一个[捷径](#single-path):
 
 ```java
 // Get the response body as a String
 List<String> groceries = get("/shopping").path("shopping.category.find { it.@type == 'groceries' }.item");
 ```
 
-#### Depth-first search
+#### 深度优先搜索
 
-It's actually possible to simplify the previous example even further:
+实际上之前的例子我们还可以继续简化：
 
 ```java
 when().
@@ -543,11 +550,13 @@ then().
        body("**.find { it.@type == 'groceries' }", hasItems("Chocolate", "Coffee"));
 ```
 
-`**` is a shortcut for doing depth first searching in the XML document. 
-We search for the first node that has an attribute named `type` equal to "groceries". Notice also that we don't end the XML path with "item". 
-The reason is that `toString()` is called automatically on the category node which returns a list of the item values.
+`**`是一种在XML文件中做深度优先搜索的捷径。
 
-### JSON Example
+我们搜索第一个`type`属性值等于"groceries"的节点。注意我们没有在"item"这个XML路径结束。
+
+原因是在category节点返回一个列表的项目值时，自动调用了`toString()`这个方法（译者注：这两句有啥因果关系我没搞懂）。
+
+### JSON示例
 
 Let's say we have a resource at `http://localhost:8080/store` that returns the following JSON document:
 
