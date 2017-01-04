@@ -1,0 +1,103 @@
+---
+layout:     post
+title:      "Java比较器的使用"
+subtitle:   ""
+date:       2016-12-25 17:04:58
+author:     "小白"
+tags:
+    - Java后端
+---
+比较器一般用于对自定义类的比较，比如我自定义了一个Person类，又有一个集合personList的元素全都是这个自定义类的实例person1、person2等，想要使用Collections.sort(personList)对集合进行排序，就需要使用比较器。
+
+Java有两种比较器的实现，Comparable和Comparator。
+
+# Comparable #
+第一种方式，让自定义类实现Comparable接口，然后实现其方法compareTo() 。
+
+```java
+public class Person implements Comparable {
+    int num;
+
+    String name;
+
+    public Person(int num, String name) {
+        this.num = num;
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "\r\tnum:"+num+" name:"+name+"\r";
+    }
+
+    public int compareTo(Object o) {
+        Person tmp=(Person) o;
+        int result=tmp.num>num?1:(tmp.num==num?0:-1);
+        if (result==0) {
+            result=tmp.name.indexOf(0)>name.indexOf(0)?1:-1;
+        }
+        return result;
+    }
+}
+```
+
+测试方法
+
+```java
+public static void main(String[] args) {
+        List<Person> list=new ArrayList<Person>(10);
+        list.add(new Person(1,"jj"));
+        list.add(new Person(0,"ww"));
+        list.add(new Person(0,"kk"));
+        list.add(new Person(2,"ll"));
+        Collections.sort(list); 
+        System.out.println(list);
+    }
+```
+
+# Comparator #
+第二种方法，在外部实现一个自定义比较器
+```java
+public class Person{
+    int num;
+
+    double salary;
+
+    public Person(int num, double salary) {
+        this.num = num;
+        this.salary = salary;
+    }
+
+    @Override
+    public String toString() {
+        return "\r\tnum:"+num+" name:"+salary+"\r";
+    }
+}
+```
+
+```java
+public class PersonComparator implements Comparator{
+    public int compare(Object o1, Object o2) {
+        Person t1=(Person) o1;
+        Person t2=(Person) o2;
+        int result=t1.num>t2.num?1:(t1.num==t2.num?0:-1);
+        return result=result==0?(t1.salary<t2.salary?1:-1):result;
+    }
+}
+```
+
+测试方法
+```java
+  public static void main(String[] args) {
+        List<Person> t=new ArrayList<Person>(10);
+        t.add(new Person(1,12));
+        t.add(new Person(0,13));
+        t.add(new Person(0,14));
+        t.add(new Person(2,15));
+        Collections.sort(t,new PersonComparator()); //外部比较器:通过实现Comparator接口
+        System.out.println(t);
+    }
+```
+ 
+# 小结 #
+> Java之所以用java.lang.Compareable,java.util.Comparator,前者是为了当你写一个类时，你要是要使它能够排序，可以选择实现，当你没实现，而后来又想实现排序功能时，两种解决办法，一是重写此类，让它实现Compareable接口，但一般不这么用，为了满足开闭原则，所以选择后者，写一个此类的比较类，实现Comparator。
