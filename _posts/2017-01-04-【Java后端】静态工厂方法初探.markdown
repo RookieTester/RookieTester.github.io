@@ -1,0 +1,60 @@
+---
+layout:     post
+title:      "静态工厂方法初探"
+subtitle:   ""
+date:       2017-01-04 23:34:12
+author:     "小白"
+tags:
+    - Java后端
+    - 设计模式
+---
+先上代码实例：
+<code>
+<pre>
+public class People {
+    private String sex;
+
+    private People() {
+    }
+
+    private People(String sex) {
+        this.sex = sex;
+    }
+
+    private final static People male = new People("male");
+    private final static People female = new People("female");
+
+    //返回sex为male的对象
+    public static People getMaleInstance() {
+        return male;
+    }
+
+    //返回sex为female的对象
+    public static People getFemaleInstance() {
+        return female;
+    }
+
+    public String getSex() {
+        return this.sex;
+    }
+}
+
+</pre>
+</code>
+
+<code>
+<pre>
+public class Test {
+    public static void main(String[] args){
+        People p=People.getMaleInstance();
+        System.out.print(p.getSex());
+    }
+}
+</pre>
+</code>
+
+可以看出，相比构造器方式，静态工厂方法每次调用不一定需要新建一个对象（本例中就没有），可以节省对象的开销。
+
+另外，由于构造器的命名限制，导致用户调用时可能会有迷惑，更依赖文档说明；而静态工厂方法则没有此限制，直接可以通过命名判断作用，一般命名需要遵循一定的规范，常用命名：valueOf()、getInstance()、newInstance等。
+
+最后还有，静态工厂方法创建的对象可以是编译期间动态创建的，比如Spring的bean的注入。
