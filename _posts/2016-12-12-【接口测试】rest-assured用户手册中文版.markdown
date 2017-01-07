@@ -531,7 +531,6 @@ String response = get("/shopping").asString();
 List<String> groceries = from(response).getList("shopping.category.find { it.@type == 'groceries' }.item");
 ```
 
-If the list of groceries is the only thing you care about in the response body you can also use a [shortcut](#single-path):
 如果groceries是你对这个响应里唯一的关注点，你也可以使用一个[捷径](#single-path):
 
 ```java
@@ -558,7 +557,7 @@ then().
 
 ### JSON示例
 
-Let's say we have a resource at `http://localhost:8080/store` that returns the following JSON document:
+假设`http://localhost:8080/store`返回如下的JSON：
 
 ```javascript
 {  
@@ -595,8 +594,8 @@ Let's say we have a resource at `http://localhost:8080/store` that returns the f
 }
 ```
 
-#### Example 1
-As a first example let's say we want to make the request to "/store" and assert that the titles of the books with a price less than 10 are "Sayings of the Century" and "Moby Dick":
+#### 例1
+在本例中我们发起一个请求"/store"，并且做了一个断言：搜集满足price字段值小于10的所有book数组里的title字段，得到了"Sayings of the Century"和"Moby Dick"这两个结果：
 
 ```java
 when().
@@ -605,8 +604,9 @@ then().
        body("store.book.findAll { it.price < 10 }.title", hasItems("Sayings of the Century", "Moby Dick"));
 ```
 
-Just as in the XML examples above we use a closure to find all books with a price less than 10 and then return the titles of all the books. 
-We then use the `hasItems` matcher to assert that the titles are the ones we expect. Using [JsonPath](http://static.javadoc.io/io.restassured/json-path/3.0.1/io/restassured/path/json/JsonPath.html) we can return the titles instead:
+就像上面XML的例子，我们使用闭包获取所有price字段值低于10的book数组，并且返回相应的title字段值集合。
+
+然后使用`hasItems`这个匹配器来断言得到我们预期的结果。使用[JsonPath](http://static.javadoc.io/io.restassured/json-path/3.0.1/io/restassured/path/json/JsonPath.html) 我们可以用下面的方法替代：
 
 ```java
 // Get the response body as a String
@@ -615,10 +615,10 @@ String response = get("/store").asString();
 List<String> bookTitles = from(response).getList("store.book.findAll { it.price < 10 }.title");
 ```
 
-#### Example 2
- Let's consider instead that we want to assert that the sum of the length of all author names are greater than 50. 
- This is a rather complex question to answer and it really shows the strength of closures and Groovy collections. 
- In REST Assured it looks like this:
+#### 例2
+考虑下该如何断言所有author字段值长度总和是否大于50的结果。
+
+这是个挺难以回答的问题，这也正展示了闭包和Groovy集合的强大之处。在rest-assured里可以：
  
  ```java
  when().
@@ -627,24 +627,28 @@ List<String> bookTitles = from(response).getList("store.book.findAll { it.price 
         body("store.book.author.collect { it.length() }.sum()", greaterThan(50));
 ```
 
-First we get all the authors (`store.book.author`) and invoke the collect method on the resulting list with the closure `{ it.length() }`. 
-What it does is to call the `length()` method on each author in the list and returns the result to a new list. 
-On this list we simply call the `sum()` method to sum all the length's. 
-The end result is `53` and we assert that it's greater than 50 by using the `greaterThan` matcher. 
+首先我们通过(`store.book.author`)得到了所有的author字段值，然后使用闭包里的方法`{ it.length() }`解析这个集合。
+
+它所做的是对列表里的每一个author字段执行一次`length()`方法，然后返回一个新的列表。在这个列表中，我们再调用`sum()`方法来求得字符长度的总和。
+
+最终的结果是53，并且我们使用`greaterThan`匹配器的断言结果是大于50 。
 But it's actually possible to simplify this even further. Consider the "[words](#example-3---complex-parsing-and-validation)" example again:
+但是实际上可以继续简化这种写法。可以再次参考"[words](#例3---复杂的解析)"这个例子
+
 
 ```groovy
 def words = ['ant', 'buffalo', 'cat', 'dinosaur']
 ```
 
-Groovy has a very handy way of calling a function for each element in the list by using the spread operator, `*`. For example:
+Groovy有一个便利的方法可以遍历列表中的所有元素，使用`*`来调用。举个例子：
+
 
 ```groovy
 def words = ['ant', 'buffalo', 'cat', 'dinosaur']
 assert [3, 6, 3, 8] == words*.length()
 ```
 
-I.e. Groovy returns a new list with the lengths of the items in the words list. We can utilize this for the author list in REST Assured as well:
+Groovy返回了一个新的包含words中每个字段字符长度的列表。我们也可以把rest-assured中的这个语法用在author列表中：
 
 ```java
 when().
@@ -653,7 +657,7 @@ then().
        body("store.book.author*.length().sum()", greaterThan(50)).
 ```
 
-And of course we can use [JsonPath](http://static.javadoc.io/io.restassured/json-path/3.0.1/io/restassured/path/json/JsonPath.html) to actually return the result:
+当然我们可以使用[JsonPath](http://static.javadoc.io/io.restassured/json-path/3.0.1/io/restassured/path/json/JsonPath.html)来获取这个结果：
 
 ```java
 // Get the response body as a string
@@ -664,14 +668,15 @@ int sumOfAllAuthorLengths = from(response).getInt("store.book.author*.length().s
 assertThat(sumOfAllAuthorLengths, is(53));
 ```
 
-## Additional Examples ##
-Micha Kops has written a really good blog with several examples (including code examples that you can checkout). You can read it [here](http://www.hascode.com/2011/10/testing-restful-web-services-made-easy-using-the-rest-assured-framework/).
+## 其它例子 ##
+Micha Kops曾写过一篇很优秀的博客，里面包含大量示例（包括可检出的代码）。你可以[由此试读](http://www.hascode.com/2011/10/testing-restful-web-services-made-easy-using-the-rest-assured-framework/)。
 
-Also [Bas Dijkstra](https://www.linkedin.com/in/basdijkstra) has been generous enough to open source his REST Assured workshop. You can read more about this [here](http://www.ontestautomation.com/open-sourcing-my-workshop-an-experiment/) and you can try out, and contribute to, the exercises available in [his](https://github.com/basdijkstra/workshops/) github repository. 
+[Bas Dijkstra](https://www.linkedin.com/in/basdijkstra)也开展过不少关于rest-assured的开源研究和资源。你可以[由此阅读更多](http://www.ontestautomation.com/open-sourcing-my-workshop-an-experiment/)，如果你想试用或者作出贡献，[他的github仓库](https://github.com/basdijkstra/workshops/)里有些可以尝试的练习题。
 
 
-## Note on floats and doubles ##
-Floating point numbers must be compared with a Java "float" primitive. For example, if we consider the following JSON object:
+## 关注于floats和doubles ##
+浮点型数字必须和Java的基本类型"float"区分开。举个例子，如果我们看下面的JSON对象：
+
 
 ```javascript
 {
@@ -680,20 +685,21 @@ Floating point numbers must be compared with a Java "float" primitive. For examp
 
 }
 ```
-the following test will fail, because we compare with a "double" instead of a "float":
+
+如下的测试将会失败，因为我们在拿一个"double"在比较，而不是"float"：
 
 ```java
 get("/price").then().assertThat().body("price", equalTo(12.12));
 ```
 
-Instead, compare with a float with:
+想用"float"比较的话写法应该是：
 
 ```java
 get("/price").then().assertThat().body("price", equalTo(12.12f));
 ```
 
-## Note on syntax ##
-When reading blogs about REST Assured you may see a lot of examples using the "given / expect / when" syntax, for example:
+## 语法糖 ##
+当阅读rest-assured的博客时，你也许会看到许多使用"given / expect / when"语法的例子，举个例子：
 ```java
 given().
         param("x", "y").
@@ -703,7 +709,7 @@ when().
         get("/lotto");
 ```
 
-This is the so called "legacy syntax" which was the de facto way of writing tests in REST Assured 1.x. While this works fine it turned out to be quite confusing and annoying for many users. The reason for not using "given / when / then" in the first place was mainly technical. So prior to REST Assured 2.0 there was no support "given / when / then" which is more or less the standard approach when you're doing some kind of BDD-like testing. The "given / expect / when" approach still works fine in 2.0 but "given / when / then" reads better and is easier to understand for most people and is thus recommended in most cases. There's however one benefit of using the "given / expect / when" approach and that is that ALL expectation errors can be displayed at the same time which is not possible with the new syntax (since the expectations are defined last). This means that if you would have had multiple expectations in the previous example such as
+这是一种“遗留语法”，这实际上是rest-assured 1.x.版本用来写测试用例的方式。然而这种运作方式令许多用户迷惑甚至恼怒。这是因为一开始没有把"given / when / then"作为主要的技术来使用。所以rest-assured得2.0版本之前差不多不支持这种类似BDD-like测试的标准用法。"given / expect / when"在2.0仍然可用但是"given / when / then"可读性更强所以在测试用例中更为推荐。然而使用"given / expect / when"还有一个好处，就是所有的期望中的错误可以在同时展示出来，这是新语法做不到的（自从预期结果放在了最后面）。这意味着如果你有多个预期结果想要检验你可以：
 
 ```java
 given().
@@ -715,7 +721,7 @@ when().
         get("/lotto");
 ```
 
-REST Assured will report that both the status code expectation and the body expectation are wrong. Rewriting this with the new syntax
+rest-assured将同时报告状态码预期和响应体预期结果都是错的。将这些用新语法重写：
 
 ```java
 given().
@@ -727,16 +733,17 @@ then().
         body("lotto.lottoId", equalTo(6));
 ```
 
-will only report an error at the first failed expectation / assertion (that status code was expected to be 400 but it was actually 200). You would have to re-run the test in order to catch the second error.
+将会仅仅报告首个预期/断言失败的内容（比如预期状态码是400实际是200），第二个断言将不执行。你将不得不重新运行这个用例以期获取到第二个断言的结果。
 
-### Syntactic Sugar ###
+### 语法糖 ###
 Another thing worth mentioning is that REST Assured contains some methods that are only there for syntactic sugar. For example the "and" method which can add readability if you're writing everything in a one-liner, for example:
+rest-assured中另一件值得注意的是，有些语法仅仅存在于语法糖中，举个例子，"and"在一行代码中使用可以增强可读性。
 
 ```java
 given().param("x", "y").and().header("z", "w").when().get("/something").then().assertThat().statusCode(200).and().body("x.y", equalTo("z"));
 ```
 
-This is the same thing as:
+这等价于:
 
 ```java
 given().
