@@ -1,0 +1,138 @@
+---
+layout:     post
+title:      "ELK搭建详解"
+subtitle:   ""
+date:       2017-01-08 21:44:14
+author:     "小白"
+tags:
+    - Java后端
+---
+# Logstash #
+## 首先安装JDK ##
+最好是1.8（最新版本）。
+## 安装logstash ##
+wget https://download.elastic.co/logstash/logstash/logstash-1.5.4.tar.gz
+
+tar zxf logstash-1.5.4.tar.gz -C /usr/local/
+
+## 配置logstash的环境变量 ##
+echo "export PATH=\$PATH:/usr/local/logstash-1.5.4/bin" > /etc/profile.d/logstash.sh
+. /etc/profile
+
+logstash -f logstash-simple.conf #以配置文件方式启动
+
+<pre>
+vim logstash-simple.conf 
+
+input { stdin {} }
+output {
+   stdout { codec=> rubydebug }
+}
+#输出信息到屏幕
+</pre>
+
+## 查看logstash的监听端口号 ##
+logstash agent -f logstash_to_redis.conf --verbose
+
+netstat -tnlp |grep java
+
+# Elasticsearch #
+## 安装Elasticsearch ##
+wget https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.7.2.tar.gz
+
+tar zxf elasticsearch-1.7.2.tar.gz -C /usr/local/
+
+## 配置 ##
+vim /usr/local/elasticsearch-1.7.2/config/elasticsearch.yml
+
+<pre>
+discovery.zen.ping.multicast.enabled: false        #关闭广播，如果局域网有机器开9300 端口，服务会启动不了
+network.host: 192.168.1.104    #指定主机地址，其实是可选的，但是最好指定因为后面跟kibana集成的时候会报http连接出错（直观体现好像是监听了:::9200 而不是0.0.0.0:9200）
+http.cors.allow-origin: "/.*/"
+http.cors.enabled: true        #这2项都是解决跟kibana集成的问题，错误体现是 你的 elasticsearch 版本过低，其实不是
+</pre>
+
+## 启动elasticsearch服务 ##
+/usr/local/elasticsearch-1.7.2/bin/elasticsearch     #日志会输出到stdout
+
+/usr/local/elasticsearch-1.7.2/bin/elasticsearch -d #表示以daemon的方式启动
+
+nohup /usr/local/elasticsearch-1.7.2/bin/elasticsearch > /var/log/logstash.log 2>&1 &
+
+## 查看elasticsearch的监听端口 ##
+netstat -tnlp |grep java
+
+## elasticsearch和logstash结合 ##
+将logstash的信息输出到elasticsearch中
+
+<pre>
+vim logstash-elasticsearch.conf 
+input { stdin {} }
+output {
+    elasticsearch { host => "192.168.1.104" }    
+    stdout { codec=> rubydebug }
+}
+</pre>
+
+## 基于配置文件启动logstash ##
+/usr/local/logstash-1.5.4/bin/logstash agent -f logstash-elasticsearch.conf
+
+## curl命令发送请求来查看elasticsearch是否接收到了数据 ##
+curl http://localhost:9200/_search?pretty
+
+## 安装elasticsearch插件 ##
+cd /usr/local/elasticsearch-1.7.2/bin/
+
+./plugin install lmenezes/elasticsearch-kopf
+
+## 浏览器访问kopf页面访问elasticsearch保存的数据 ##
+[http://ip:9200/_plugin/kopf/#!/cluster](http://ip:9200/_plugin/kopf/#!/cluster)
+
+## 从redis数据库中读取然后输出到elasticsearch中 ##
+<pre>
+vim logstash-redis.conf
+input {
+    redis {
+        host => '192.168.1.104' 
+        data_type => 'list'
+        port => "6379"
+        key => 'logstash:redis' #自定义
+        type => 'redis-input'   #自定义
+        password => 'xxx'
+    }
+}
+output {
+    elasticsearch {
+        host => "192.168.1.104"
+        codec => "json"
+        protocol => "http"  #版本1.0+ 必须指定协议http
+    }
+}
+</pre>
+
+# Kinaba #
+## 安装Kinaba ##
+wget https://download.elastic.co/kibana/kibana/kibana-4.1.2-linux-x64.tar.gz
+
+tar zxf kibana-4.1.2-linux-x64.tar.gz -C /usr/local
+
+## kinaba配置文件kinaba.yml ##
+vim /usr/local/kibana-4.1.2-linux-x64/config/kibana.yml
+
+elasticsearch_url: "http://192.168.1.104:9200"
+
+## 启动kinaba ##
+/usr/local/kibana-4.1.2-linux-x64/bin/kibana
+
+<pre>
+输出以下信息，表明kinaba成功.
+{"name":"Kibana","hostname":"localhost.localdomain","pid":1943,"level":30,"msg":"No existing kibana index found","time":"2015-10-08T00:39:21.617Z","v":0}
+{"name":"Kibana","hostname":"localhost.localdomain","pid":1943,"level":30,"msg":"Listening on 0.0.0.0:5601","time":"2015-10-08T00:39:21.637Z","v":0}
+kinaba默认监听在本地的5601端口上
+</pre>
+
+## 浏览器访问kinaba ##
+[http://ip:5601/](http://ip:5601/)
+
+# 参考资料 #
+[原文：http://467754239.blog.51cto.com/4878013/1700828/](http://467754239.blog.51cto.com/4878013/1700828/)

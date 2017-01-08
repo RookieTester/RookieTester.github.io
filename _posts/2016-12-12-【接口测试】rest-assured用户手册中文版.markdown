@@ -736,7 +736,6 @@ then().
 将会仅仅报告首个预期/断言失败的内容（比如预期状态码是400实际是200），第二个断言将不执行。你将不得不重新运行这个用例以期获取到第二个断言的结果。
 
 ### 语法糖 ###
-Another thing worth mentioning is that REST Assured contains some methods that are only there for syntactic sugar. For example the "and" method which can add readability if you're writing everything in a one-liner, for example:
 rest-assured中另一件值得注意的是，有些语法仅仅存在于语法糖中，举个例子，"and"在一行代码中使用可以增强可读性。
 
 ```java
@@ -756,16 +755,16 @@ then().
         body("x.y", equalTo("z"));
 ```
 
-# Getting Response Data #
-You can also get the content of a response. E.g. let's say you want to return the body of a get request to "/lotto". You can get it a variety of different ways:
+# 获取响应信息 #
+你也可以获得响应的内容。比方说你想通过发起一个get请求"/lotto"并获取其响应内容。你可以以多种方式：
 ```java
 InputStream stream = get("/lotto").asInputStream(); // Don't forget to close this one when you're done
 byte[] byteArray = get("/lotto").asByteArray();
 String json = get("/lotto").asString();
 ```
 
-## Extracting values from the Response after validation ##
-You can extract values from the response or return the response instance itself after you've done validating the response by using the `extract` method. This is useful for example if you want to use values from the response in sequent requests. For example given that a resource called `title` returns the following JSON
+## 从验证过的响应信息中提取值 ##
+你可以从响应信息中提取值，或者使用`extract`方法仅仅返回response本身的一个实例。如何你想获取响应里的值，并将其作为接下来的请求内容，这会很有用。下面是一个叫做`title`的资源返回的JSON数据：
 ```javascript
  {
      "title" : "My Title",
@@ -775,8 +774,8 @@ You can extract values from the response or return the response instance itself 
            }
  }
 ```
-and you want to validate that content type is equal to `JSON` and the title is equal to `My Title`
-but you also want to extract the link to the `next` title to use that in a subsequent request. This is how:
+
+你想验证内容类型是JSON格式且标题是`My Title`，但是还想要从中提取next的值并用来发起请求，下面是使用方法：
 
 ```java
 String nextTitleLink =
@@ -793,7 +792,7 @@ extract().
 get(nextTitleLink). ..
 ```
 
-You could also decide to instead return the entire response if you need to extract multiple values from the response:
+如果你想提取多个值，也可以考虑返回整个响应体：
 ```java
 Response response = 
 given().
@@ -810,15 +809,15 @@ String nextTitleLink = response.path("_links.next.href");
 String headerValue = response.header("headerName");
 ```
 
-## JSON (using JsonPath) ##
-Once we have the response body we can then use the [JsonPath](http://static.javadoc.io/io.restassured/json-path/3.0.1/io/restassured/path/json/JsonPath.html) to get data from the response body:
+## JSON (使用 JsonPath) ##
+一旦我们取得了响应体，我们可以使用[JsonPath](http://static.javadoc.io/io.restassured/json-path/3.0.1/io/restassured/path/json/JsonPath.html)来提取相应的数据：
 
 ```java
 int lottoId = from(json).getInt("lotto.lottoId");
 List<Integer> winnerIds = from(json).get("lotto.winners.winnerId");
 ```
 
-Or a bit more efficiently:
+或者更高效一些:
 ```java
 JsonPath jsonPath = new JsonPath(json).setRoot("lotto");
 int lottoId = jsonPath.getInt("lottoId");
@@ -826,22 +825,23 @@ List<Integer> winnerIds = jsonPath.get("winners.winnderId");
 ```
 
 Note that you can use `JsonPath` standalone without depending on REST Assured, see [getting started guide](GettingStarted) for more info on this.
+注意这里我们独立地使用了`JsonPath`，而没有依赖rest-assured本身的功能，看[getting started guide](GettingStarted) 获取更多信息。
 
-### JsonPath Configuration ###
-You can configure object de-serializers etc for JsonPath by configuring it, for example:
+### JsonPath 配置 ###
+你可以为JsonPath配置反序列化对象（object de-serializers），举个例子：
 ```java
 JsonPath jsonPath = new JsonPath(SOME_JSON).using(new JsonPathConfig("UTF-8"));
 ```
 
-It's also possible to configure JsonPath statically so that all instances of JsonPath will shared the same configuration:
+也可以静态配置好JsonPath，这样所有的JsonPath实例都会共享这个配置：
 
 ```java
 JsonPath.config = new JsonPathConfig("UTF-8");
 ```
 
-You can read more about JsonPath at [this blog](http://www.jayway.com/2013/04/12/whats-new-in-rest-assured-1-8/).
+更多JsonPath的内容参照[这篇博客](http://www.jayway.com/2013/04/12/whats-new-in-rest-assured-1-8/)。
 
-Note that the JsonPath implementation uses <a href='http://groovy-lang.org/processing-xml.html#_gpath'>Groovy's GPath</a> syntax and is not to be confused with Jayway's <a href='https://github.com/jayway/JsonPath'>JsonPath</a> implementation.
+注意这里的JsonPath基于<a href='http://groovy-lang.org/processing-xml.html#_gpath'>Groovy的GPath</a>，不要和<a href='https://github.com/jayway/JsonPath'>Jayway</a>的搞混了。
 
 ## XML (using XmlPath) ##
 You also have the corresponding functionality for XML using  [XmlPath](http://static.javadoc.io/io.restassured/xml-path/3.0.1/io/restassured/path/xml/XmlPath.html):
