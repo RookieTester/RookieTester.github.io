@@ -1,0 +1,21 @@
+---
+layout:     post
+title:      "使用私有构造器令某个类不可实例化"
+subtitle:   ""
+date:       2017-01-09 23:09:37
+author:     "小白"
+tags:
+    - Java后端
+---
+某些类可能根本不需要实例化，比如Math。我们可以通过构建一个私有构造器。然而这样虽然不能从外部轻易实例化，却不能保证内部或者使用反射机制。所以在私有构造器里又抛出了一个异常。。。
+
+<pre>
+public class Test {
+    private Test(){
+        throw new AssertionError();
+    }
+    public static void main(String[] args) {
+        Test test=new Test();
+    }
+}
+</pre>
