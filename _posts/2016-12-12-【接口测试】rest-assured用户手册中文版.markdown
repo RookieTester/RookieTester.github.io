@@ -843,8 +843,8 @@ JsonPath.config = new JsonPathConfig("UTF-8");
 
 注意这里的JsonPath基于<a href='http://groovy-lang.org/processing-xml.html#_gpath'>Groovy的GPath</a>，不要和<a href='https://github.com/jayway/JsonPath'>Jayway</a>的搞混了。
 
-## XML (using XmlPath) ##
-You also have the corresponding functionality for XML using  [XmlPath](http://static.javadoc.io/io.restassured/xml-path/3.0.1/io/restassured/path/xml/XmlPath.html):
+## XML (使用XmlPath) ##
+你也可以使用[XmlPath](http://static.javadoc.io/io.restassured/xml-path/3.0.1/io/restassured/path/xml/XmlPath.html)相应的功能：
 
 ```java
 String xml = post("/greetXML?firstName=John&lastName=Doe").andReturn().asString();
@@ -858,39 +858,39 @@ String firstName = xmlPath.get("firstName");
 String lastName = xmlPath.get("lastName");
 ```
 
-Note that you can use `XmlPath` standalone without depending on REST Assured, see [getting started guide](GettingStarted) for more info on this.
+注意你可以独立于rest-assured，单独使用`XmlPath`的功能，更多信息参见[getting started guide](GettingStarted)。
 
-### XmlPath Configuration ###
-You can configure object de-serializers and charset for XmlPath by configuring it, for example:
+### XmlPath配置 ###
+你可以配置XmlPath的对象反序列化器和字符编码，举个例子：
 ```java
 XmlPath xmlPath = new XmlPath(SOME_XML).using(new XmlPathConfig("UTF-8"));
 ```
 
-It's also possible to configure XmlPath statically so that all instances of XmlPath will shared the same configuration:
+也可以静态地配置XmlPath，使得所有的实例都能共享这套配置：
 
 ```java
 XmlPath.config = new XmlPathConfig("UTF-8");
 ```
 
-You can read more about XmlPath at [this blog](http://www.jayway.com/2013/04/12/whats-new-in-rest-assured-1-8/).
+更多关于XmlPath的信息参阅[这篇博客](http://www.jayway.com/2013/04/12/whats-new-in-rest-assured-1-8/)。
 
-## Single path ##
-If you only want to make a request and return a single path you can use a shortcut:
+## 单独路径 ##
+如果你只是想发起一个请求并返回一个单独路径下的值，你可以使用一个捷径：
 ```java
 int lottoId = get("/lotto").path("lotto.lottoid");
 ```
 
-REST Assured will automatically determine whether to use JsonPath or XmlPath based on the content-type of the response. If no content-type is defined then REST Assured will try to look at the [default parser](#default-parser) if defined. You can also manually decide which path instance to use, e.g.
+rest-assured会基于响应体的content-type自动决定是使用JsonPath还是XmlPath。如果这个类型在rest-assured没有被定义，它将会自动到[default parser](#default-parser)中查找。你可以自行（代码指定）决定使用哪种，比如：
 
 ```java
 String firstName = post("/greetXML?firstName=John&lastName=Doe").andReturn().xmlPath().getString("firstName");
 ```
 
-Options are `xmlPath`, `jsonPath` and `htmlPath`.
+`xmlPath`, `jsonPath`和`htmlPath`都是可选项。
 
-## Headers, cookies, status etc ##
+## Headers, cookies, status等等 ##
 
-You can also get headers, cookies, status line and status code:
+你也可以获取header、cookie、状态信息等：
 ```java
 Response response = get("/lotto");
 
@@ -910,19 +910,19 @@ String statusLine = response.getStatusLine();
 int statusCode = response.getStatusCode();
 ```
 
-## Multi-value headers and cookies ##
-A header and a cookie can contain several values for the same name.
+## 复合值header和cookie ##
+一个header和cookie的一个属性（key）可以包含多个值（value）。
 
-### Multi-value headers ###
-To get all values for a header you need to first get the [Headers](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/http/Headers.html) object from the [Response](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/response/Response.html) object. From the `Headers` instance you can get all values using the [Headers.getValues(<header name>)](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/http/Headers.html#getValues(java.lang.String)) method which returns a `List` with all header values.
+### 复合值header ###
+想要获取一个header的所有值，首先你要从[Response对象](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/response/Response.html)中获取[Headers](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/http/Headers.html)对象。使用[Headers.getValues(<header name>)](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/http/Headers.html#getValues(java.lang.String))方法你可以从`Headers`实例中获取一个存有全部header值的列表。
 
-### Multi-value cookies ###
-To get all values for a cookie you need to first get the [Cookies](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/http/Cookies.html) object from the [Response](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/response/Response.html) object. From the `Cookies` instance you can get all values using the [Cookies.getValues(<cookie name>)](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/http/Cookies.html#getValues(java.lang.String)) method which returns a `List` with all cookie values.
+### 复合值cookie ###
+想要获取一个cookie的所有值，首先你要从[Response对象](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/response/Response.html)中获取[Cookies对象](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/http/Cookies.html)。使用[Cookies.getValues(<cookie name>)](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/http/Cookies.html#getValues(java.lang.String))方法你可以从`Cookies`实例中获取一个存有全部cookie值的列表。
 
-## Detailed Cookies ##
-If you need to get e.g. the comment, path or expiry date etc from a cookie you need get a [detailed cookie](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/http/Cookie.html) from REST Assured. To do this you can use the [Response.getDetailedCookie(java.lang.String)](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/response/ResponseOptions.html#getDetailedCookie-java.lang.String-) method. The detailed cookie then contains all attributes from the cookie.
+## 详细的Cookie ##
+如果你想要从cookie中获取例如注释、路径或者有效期（expiry date）等，你需要从rest-assured中获取一个[detailed cookie](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/http/Cookie.html)。你可以使用[Response.getDetailedCookie(java.lang.String)](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/response/ResponseOptions.html#getDetailedCookie-java.lang.String-)方法，详细的cookie包含cookie里的所有属性。
 
-You can also get all detailed response [cookies](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/http/Cookies.html) using the [Response.getDetailedCookies()](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/response/ResponseOptions.html#getDetailedCookies--) method.
+你也可以使用[Response.getDetailedCookies()](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/response/ResponseOptions.html#getDetailedCookies--)方法获取所有详细的response [cookies](http://static.javadoc.io/io.rest-assured/rest-assured/3.0.1/io/restassured/http/Cookies.html)。
 
 # Specifying Request Data #
 
