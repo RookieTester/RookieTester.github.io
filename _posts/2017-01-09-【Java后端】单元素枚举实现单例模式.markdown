@@ -1,0 +1,30 @@
+---
+layout:     post
+title:      "单元素枚举实现单例模式"
+subtitle:   ""
+date:       2017-01-09 22:53:53
+author:     "小白"
+tags:
+    - Java后端
+    - 设计模式
+---
+使用静态工厂方法或者传统地声明一个public的实例域（并将构造器声明为private），都可以实现单例模式，但是使用反射机制都可以获取不同的实例。
+
+自从枚举出现以后，单元素枚举就成为了单例的绝佳选择。
+
+<pre>
+public enum Singleton {
+    INSTANCE;
+}
+</pre>
+
+<pre>
+public class Test {
+    public static void main(String[] args) {
+        Singleton singleton1 = Singleton.INSTANCE;
+        Singleton singleton2 = Singleton.INSTANCE;
+        System.out.print(singleton1==singleton2);
+    }
+}
+</pre>
+结果是true，说明单元素枚举的单例方案确实可行。
