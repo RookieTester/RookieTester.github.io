@@ -1,0 +1,14 @@
+---
+layout:     post
+title:      "MVC个人理解"
+subtitle:   ""
+date:       2017-07-01 00:35:37
+author:     "小白"
+tags:
+    - Java后端
+---
+MVC全名是Model View Controller，是模型(model)－视图(view)－控制器(controller)的缩写，一种软件设计典范，用一种业务逻辑、数据、界面显示分离的方法组织代码。
+
+用户访问并操作页面（V），发起请求，这时到达了C，经过一番处理，改变了M的状态，或者渲染不同的V，M将变化后的状态通知V，V作出相应改变。
+
+V不应该直接操作M层，因为V的职责应该是展示而不是操作。
